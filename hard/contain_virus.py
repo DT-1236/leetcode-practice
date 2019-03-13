@@ -10,26 +10,45 @@ class Graph:
     def __init__(self, grid):
         self.nodes = {}
         self.walls = 0
-        self.representative_infected_nodes = []
 
         for y in range(0, len(grid)):
             for x in range(0, len(grid[y])):
                 self.nodes[(x, y)] = Node(x, y, grid, self)
 
-    def assess(self):
+    def get_representative_infected_nodes(self):
+        """Returns a representative node of the most threatening area"""
         queue = set(self.nodes.keys())
+        representative_infected_nodes = []
         while queue:
             node = self.nodes[queue.pop()]
             if node.infected:
-                self.representative_infected_nodes.append(node)
+                representative_infected_nodes.append(node)
                 queue = queue ^ node.zone
-        most_threatened = 0
+        return representative_infected_nodes
+
+    @staticmethod
+    def find_most_threatening_zone(representative_nodes):
         most_threatening = None
-        for node in self.representative_infected_nodes:
-            if len(node.threatening) > most_threatened:
+        for node in representative_nodes:
+            if len(node.threatening) > len(most_threatened.threatening):
                 most_threatening = node
-                most_threatened = len(node.threatening)
         return most_threatening
+
+    def build_walls(self, node):
+        """The node is a representative infected node for that zone"""
+        queue = node.threatening
+        while queue:
+            safe = nodes[queue.pop()]
+            for coords in safe.adjacent:
+                neighbor = self.nodes[coords]
+                if neighbor.infected:
+                    safe.adjacent.remove(coords)
+                    neighbor.adjacent.remove((safe.x, safe.y))
+                    self.walls += 1
+
+    def propagate_virus(self, infected):
+        for node in infected:
+            pass
 
 
 class Node:
